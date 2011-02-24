@@ -81,9 +81,13 @@ module MyBerkeleyData
       @ced_advisors_group.add_member @sling, advisor.name, "user"
       user_props = @user_manager.get_user_props advisor.name
     end
-    
+
+    def load_defined_user_nonadvisors
+      loaded_advisors = load_defined_users "/tmp/json_data.js"
+    end
+
     def load_defined_user_advisors
-      loaded_advisors = load_defined_users "json_data.js"
+      loaded_advisors = load_defined_users "/tmp/json_data.js"
       loaded_advisors.each do |loaded_advisor|
         add_advisor_to_group loaded_advisor
         apply_advisor_aces loaded_advisor
@@ -288,6 +292,8 @@ if ($PROGRAM_NAME.include? 'sling_data_loader.rb')
   puts "will attempt to create or update #{ARGV[2]} users"
   sdl = MyBerkeleyData::SlingDataLoader.new ARGV[0], ARGV[1], ARGV[2]
   sdl.get_or_create_groups
-  sdl.load_defined_user_advisors #now loading all the project members as advisors same as load_defined_users except adding to g-ced-advisors
-  sdl.load_calnet_test_users
+  sdl.load_defined_user_nonadvisors
+  #sdl.load_defined_user_advisors #now loading all the project members as advisors same as load_defined_users except adding to g-ced-advisors
+  #sdl.load_calnet_test_users
+
 end

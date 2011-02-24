@@ -12,33 +12,39 @@ module MyBerkeleyData
 # currently sling_data_loader.rb does not call this directly but reads the output file.
 # this could be easily changed to a direct call but currently am checking in the data file for other possible uses
 
+  WORKSHOP_UIDS = ['772189','313367','766739']
+
   def make_defined_users_json
     hits = []
     staff = UCB::LDAP::Entry.search(:base => "ou=people,dc=berkeley,dc=edu", :filter => make_staff_filter)
     puts "found #{staff.length} staff members"
-    hits.concat staff
-    
+    #hits.concat staff
+
     students = UCB::LDAP::Entry.search(:base => "ou=people,dc=berkeley,dc=edu", :filter => make_students_filter)
     puts "found #{students.length} student members"
-    hits.concat students
-    
+    #hits.concat students
+
     others = UCB::LDAP::Entry.search(:base => "ou=people,dc=berkeley,dc=edu", :filter => make_others_filter)
     puts "found #{others.length} other members"
-    hits.concat others
+    #hits.concat others
     #hits.sort {|x, y| x.attributes[:sn][0].slice(1) <=> y.attributes[:sn][0].slice(1) }  # this appears to not work, giving up
-  
+
     faculty = UCB::LDAP::Entry.search(:base => "ou=people,dc=berkeley,dc=edu", :filter => make_faculty_filter)
- 
+
+    workshoppers = UCB::LDAP::Entry.search(:base => "ou=people,dc=berkeley,dc=edu", :filter => make_workshoppers_filter)
+    puts "found #{workshoppers.length} workshop participants"
+    hits.concat workshoppers
+
     return make_user_json hits 
   end
   
   def write_json(json_data, file_name = "json_data.js")
-    json_file = File.new "json_data.js", "w"
+    json_file = File.new "/tmp/json_data.js", "w"
     json_file.write json_data
   end
-  
+
   def make_staff_filter
-    
+
     rachael = make_name_filter "Rachel", "Hollowgrass"
     tonyc = make_name_filter "Tony", "Christopher"
     bernie = make_name_filter "Bernadette", "Geuy"
@@ -58,9 +64,9 @@ module MyBerkeleyData
     susanh = make_name_filter "Susan Janan", "HAGSTROM"
     return rachael | tonyc | bernie | eli | oliver | ray | johnk | davids | owenm | darlenek | kevinc | gregg | marah | jonh | romans | ctweney | susanh
   end
-  
+
   def make_students_filter
-    
+
     mattheww = make_name_filter "Matthew", "Waid"
     michaele= make_name_filter "Michael", "Ellison"
     jessicav = make_name_filter "Jessica B", "Voytek"
@@ -68,20 +74,28 @@ module MyBerkeleyData
     nicolen = make_name_filter "Nicole", "Ng"
     geobiob = make_name_filter "Geobio", "Boo"
     avneeshk = make_name_filter "Avneesh", "Kohli"
-    
+
     return mattheww | michaele | jessicav | whitneyl | nicolen | geobiob | avneeshk
   end
-  
-  def make_others_filter 
+
+  def make_others_filter
     adamh = make_name_filter "Adam", "Hochman"
     joshh = make_name_filter "Josh", "Holtzman"
     return adamh | joshh
   end
-  
-  def make_faculty_filter 
+
+  def make_faculty_filter
     martinj = make_name_filter "Martin E.", "Jay"
   end
-  
+
+  def make_workshoppers_filter
+    filter = make_name_filter "XXX", "YYY"
+    WORKSHOP_UIDS.each do |uid|
+      filter = filter | Net::LDAP::Filter.eq("uid", uid)
+    end
+    return filter
+  end
+
   def make_name_filter first, last
     ff = Net::LDAP::Filter.eq("givenname", first.capitalize) 
     lf = Net::LDAP::Filter.eq("sn", last.upcase)
