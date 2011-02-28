@@ -12,7 +12,8 @@ module MyBerkeleyData
 # currently sling_data_loader.rb does not call this directly but reads the output file.
 # this could be easily changed to a direct call but currently am checking in the data file for other possible uses
 
-  WORKSHOP_UIDS = ['772189','313367','766739']
+  WORKSHOP_UIDS = ['592722','862928','237439', '234064', '773731', '770029', '757580', '752481', '862702', '885192',
+                   '720717', '867600', '751530', '881905', '323487']
 
   def make_defined_users_json
     hits = []
